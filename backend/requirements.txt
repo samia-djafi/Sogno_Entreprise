@@ -1,0 +1,17 @@
+# API
+fastapi==0.141.1
+uvicorn==0.52.2
+pydantic==2.13.4
+
+# RAG & LLM
+sentence-transformers==5.7.0
+torch==2.13.0
+qdrant-client==1.19.0
+groq==1.6.0
+
+# Configuration
+python-dotenv==1.2.2
+
+# Testing
+pytest==9.1.1
+httpx==0.28.1

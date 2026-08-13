@@ -36,12 +36,18 @@ TOP_K = 5
 # LOAD EMBEDDING MODEL
 # ==================================================
 
-print("Loading embedding model...")
+model = None
 
-model = SentenceTransformer(EMBEDDING_MODEL)
 
-print("Embedding model loaded.")
+def get_embedding_model():
+    global model
 
+    if model is None:
+        print("Loading embedding model...")
+        model = SentenceTransformer(EMBEDDING_MODEL)
+        print("Embedding model loaded.")
+
+    return model
 
 # ==================================================
 # CONNECT TO QDRANT
@@ -115,7 +121,9 @@ def retrieve(
     # 1. Convert question into embedding
     # ----------------------------------------------
 
-    query_vector = model.encode(
+    embedding_model = get_embedding_model()
+
+    query_vector = embedding_model.encode(
         question
     ).tolist()
 

@@ -1,8 +1,17 @@
+import os
 from pathlib import Path
 
+from dotenv import load_dotenv
 from qdrant_client import QdrantClient
 from qdrant_client.models import Filter, FieldCondition, MatchValue
 from sentence_transformers import SentenceTransformer
+
+
+# ==================================================
+# ENVIRONMENT
+# ==================================================
+
+load_dotenv()
 
 
 # ==================================================
@@ -12,6 +21,9 @@ from sentence_transformers import SentenceTransformer
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 QDRANT_PATH = BASE_DIR / "qdrant_storage"
+
+QDRANT_URL = os.getenv("QDRANT_URL")
+QDRANT_API_KEY = os.getenv("QDRANT_API_KEY")
 
 COLLECTION_NAME = "sogno_knowledge_base"
 
@@ -35,9 +47,24 @@ print("Embedding model loaded.")
 # CONNECT TO QDRANT
 # ==================================================
 
-client = QdrantClient(
-    path=str(QDRANT_PATH)
-)
+if QDRANT_URL:
+
+    # Production: Qdrant Cloud
+    print("Connecting to Qdrant Cloud...")
+
+    client = QdrantClient(
+        url=QDRANT_URL,
+        api_key=QDRANT_API_KEY,
+    )
+
+else:
+
+    # Local development: local Qdrant storage
+    print("Using local Qdrant storage...")
+
+    client = QdrantClient(
+        path=str(QDRANT_PATH)
+    )
 
 
 # ==================================================
@@ -59,11 +86,8 @@ def _format_results(results):
         retrieved_chunks.append(
             {
                 "chunk_id": payload.get("chunk_id"),
-
                 "text": payload.get("text"),
-
                 "metadata": payload.get("metadata"),
-
                 "score": result.score,
             }
         )

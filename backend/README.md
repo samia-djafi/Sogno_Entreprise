@@ -1,6 +1,8 @@
 # Sogno Enterprise — RAG Backend
 
-> Production-oriented Retrieval-Augmented Generation (RAG) backend for an enterprise knowledge assistant.
+> A retrieval-augmented generation backend that lets employees query an internal knowledge base in natural language, without the answers wandering off into the model's pretrained guesses.-Test: `https://sogno-entreprise.onrender.com/docs`
+
+
 
 Sogno Enterprise is an AI-powered internal knowledge assistant designed to answer employee questions using a controlled collection of company documents.
 
@@ -12,7 +14,18 @@ The system is designed around an important principle:
 
 ---
 
-# Architecture Overview
+## The problem this solves
+
+Internal knowledge bases have two failure modes once you put an LLM in front of them:
+
+1. **The model answers from memory instead of your documents.** It sounds right, cites nothing, and is occasionally confidently wrong about your own company's policies.
+2. **The retrieval layer doesn't respect who's asking.** A naive implementation embeds everything into one collection and lets similarity search decide what's "relevant" — with no concept of who's allowed to see it. Filtering results *after* retrieval is a common workaround, but by then the sensitive chunk has already been pulled into the context window and handed to the LLM. Whether the LLM "chooses" not to repeat it isn't a control you can rely on.
+
+Sogno Enterprise addresses both: answers are grounded in retrieved context (not open-ended generation), and role/metadata filtering (employee / manager) happens as part of the Qdrant query itself, so restricted content never enters the prompt in the first place.
+
+---
+
+## Architecture Overview
 
 The system follows this pipeline:
 
@@ -94,3 +107,49 @@ The system follows this pipeline:
                     │ AI Enterprise         │
                     │ Assistant             │
                     └──────────────────────┘
+```
+
+---
+
+## Tech stack
+
+| Layer | Choice |
+|---|---|
+| API | FastAPI |
+| Embeddings | `all-MiniLM-L6-v2` (Sentence Transformers) |
+| Vector store | Qdrant |
+| LLM | Llama 3.3 70B via Groq |
+| Frontend | React |
+| Deployment | Render (API) / Vercel (frontend) |
+
+---
+
+## Project structure
+
+```
+backend/
+├── api/
+├── rag/
+│   ├── ingestion/
+│   ├── retrieval.py
+│   ├── augmentation.py
+│   └── generation.py
+├── main.py
+├── requirements.txt
+└── .env.example
+```
+
+---
+
+## Production
+
+- API only (no frontend): `https://sogno-entreprise.onrender.com/docs`
+- Full app (with the SaaS frontend): `https://sogno-entreprise.vercel.app`
+
+---
+
+## Author
+
+**Samia Djafi** — Computer Science Engineering Student, Artificial Intelligence
+
+RAG · LLMs · Vector Search · FastAPI · Python · React

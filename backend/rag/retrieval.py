@@ -2,9 +2,7 @@ import os
 from pathlib import Path
 
 from dotenv import load_dotenv
-from qdrant_client import QdrantClient
-from qdrant_client.models import Filter, FieldCondition, MatchValue
-from sentence_transformers import SentenceTransformer
+from qdrant_client import QdrantClient, models
 
 
 # ==================================================
@@ -27,27 +25,10 @@ QDRANT_API_KEY = os.getenv("QDRANT_API_KEY")
 
 COLLECTION_NAME = "sogno_knowledge_base"
 
-EMBEDDING_MODEL = "all-MiniLM-L6-v2"
+EMBEDDING_MODEL = "sentence-transformers/all-MiniLM-L6-v2"
 
 TOP_K = 5
 
-
-# ==================================================
-# LOAD EMBEDDING MODEL
-# ==================================================
-
-model = None
-
-
-def get_embedding_model():
-    global model
-
-    if model is None:
-        print("Loading embedding model...")
-        model = SentenceTransformer(EMBEDDING_MODEL)
-        print("Embedding model loaded.")
-
-    return model
 
 # ==================================================
 # CONNECT TO QDRANT
@@ -55,17 +36,24 @@ def get_embedding_model():
 
 if QDRANT_URL:
 
+    # ----------------------------------------------
     # Production: Qdrant Cloud
+    # ----------------------------------------------
+
     print("Connecting to Qdrant Cloud...")
 
     client = QdrantClient(
         url=QDRANT_URL,
         api_key=QDRANT_API_KEY,
+        cloud_inference=True,
     )
 
 else:
 
-    # Local development: local Qdrant storage
+    # ----------------------------------------------
+    # Local development: local Qdrant
+    # ----------------------------------------------
+
     print("Using local Qdrant storage...")
 
     client = QdrantClient(
@@ -78,6 +66,7 @@ else:
 # ==================================================
 
 def _format_results(results):
+
     """
     Convert Qdrant search results into the
     standardized format used by the RAG pipeline.
@@ -87,13 +76,13 @@ def _format_results(results):
 
     for result in results.points:
 
-        payload = result.payload
+        payload = result.payload or {}
 
         retrieved_chunks.append(
             {
                 "chunk_id": payload.get("chunk_id"),
                 "text": payload.get("text"),
-                "metadata": payload.get("metadata"),
+                "metadata": payload.get("metadata", {}),
                 "score": result.score,
             }
         )
@@ -110,37 +99,30 @@ def retrieve(
     user_role=None,
     top_k=TOP_K
 ):
+
     """
     Retrieve the most relevant knowledge-base chunks
     for a user question.
+
+    In production, Qdrant Cloud generates the query
+    embedding using all-MiniLM-L6-v2.
 
     Access is filtered according to the user's role.
     """
 
     # ----------------------------------------------
-    # 1. Convert question into embedding
-    # ----------------------------------------------
-
-    embedding_model = get_embedding_model()
-
-    query_vector = embedding_model.encode(
-        question
-    ).tolist()
-
-
-    # ----------------------------------------------
-    # 2. Build access filter
+    # 1. BUILD ACCESS FILTER
     # ----------------------------------------------
 
     query_filter = None
 
     if user_role:
 
-        query_filter = Filter(
+        query_filter = models.Filter(
             must=[
-                FieldCondition(
+                models.FieldCondition(
                     key="metadata.access_roles",
-                    match=MatchValue(
+                    match=models.MatchValue(
                         value=user_role
                     )
                 )
@@ -149,20 +131,48 @@ def retrieve(
 
 
     # ----------------------------------------------
-    # 3. Search Qdrant
+    # 2. SEARCH QDRANT
     # ----------------------------------------------
 
-    results = client.query_points(
-        collection_name=COLLECTION_NAME,
-        query=query_vector,
-        query_filter=query_filter,
-        limit=top_k,
-        with_payload=True
-    )
+    if QDRANT_URL:
+
+        # ------------------------------------------
+        # Production: Qdrant Cloud Inference
+        # ------------------------------------------
+
+        results = client.query_points(
+            collection_name=COLLECTION_NAME,
+
+            query=models.Document(
+                text=question,
+                model=EMBEDDING_MODEL
+            ),
+
+            query_filter=query_filter,
+
+            limit=top_k,
+
+            with_payload=True
+        )
+
+    else:
+
+        # ------------------------------------------
+        # Local development
+        #
+        # This requires your existing local
+        # SentenceTransformer setup.
+        # ------------------------------------------
+
+        raise RuntimeError(
+            "Local retrieval is disabled in this "
+            "deployment version. Set QDRANT_URL and "
+            "use Qdrant Cloud with cloud_inference=True."
+        )
 
 
     # ----------------------------------------------
-    # 4. Format results
+    # 3. FORMAT RESULTS
     # ----------------------------------------------
 
     return _format_results(results)
@@ -177,7 +187,6 @@ if __name__ == "__main__":
     print("\n=== SOGNO ENTERPRISE ===")
     print("RETRIEVAL TEST")
 
-
     # ----------------------------------------------
     # Get user question
     # ----------------------------------------------
@@ -185,7 +194,6 @@ if __name__ == "__main__":
     question = input(
         "\nAsk a question: "
     )
-
 
     # ----------------------------------------------
     # Get user role
@@ -195,16 +203,16 @@ if __name__ == "__main__":
         "User role (employee/manager): "
     ).strip().lower()
 
-
     # ----------------------------------------------
     # Retrieve relevant chunks
     # ----------------------------------------------
+
+    print("\nRetrieving relevant chunks...")
 
     results = retrieve(
         question,
         user_role=role
     )
-
 
     # ----------------------------------------------
     # Display results
@@ -214,7 +222,6 @@ if __name__ == "__main__":
     print("RETRIEVED CHUNKS")
     print("================================")
 
-
     for i, result in enumerate(
         results,
         start=1
@@ -222,33 +229,29 @@ if __name__ == "__main__":
 
         metadata = result["metadata"]
 
-
         print(
             f"\n--- Result {i} ---"
         )
-
 
         print(
             "Score:",
             result["score"]
         )
 
-
         print(
             "Document:",
-            metadata.get(
-                "document_name"
-            )
+            metadata.get("document_name")
         )
-
 
         print(
             "Page:",
-            metadata.get(
-                "page"
-            )
+            metadata.get("page")
         )
 
+        print(
+            "Section:",
+            metadata.get("section")
+        )
 
         print(
             "Text:",

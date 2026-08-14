@@ -144,7 +144,7 @@ backend/
 ## Production
 
 - API only (no frontend): [https://sogno-entreprise.onrender.com/docs](https://sogno-entreprise.onrender.com/docs)
-- Full app (with the SaaS frontend): [[https://sogno-entreprise.onrender.com/docs](https://sogno-entreprise.vercel.app)]([https://sogno-entreprise.onrender.com/docs](https://sogno-entreprise.vercel.app))
+- Full app (with the SaaS frontend):[https://sogno-entreprise.vercel.app](https://sogno-entreprise.vercel.app)
 
 ---
 

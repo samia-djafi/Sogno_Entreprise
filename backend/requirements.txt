@@ -4,7 +4,6 @@ uvicorn==0.52.2
 pydantic==2.13.4
 
 # RAG & LLM
-sentence-transformers==5.7.0
 qdrant-client==1.19.0
 groq==1.6.0
 

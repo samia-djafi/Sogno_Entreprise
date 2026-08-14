@@ -306,7 +306,6 @@ export default function UnansweredQuestionsPage() {
   <UploadDocumentModal
     onClose={() => {
       setShowUpload(false)
-      window.location.reload()
     }}
   />
 )}

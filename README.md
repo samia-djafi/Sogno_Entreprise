@@ -44,7 +44,7 @@ LLM Generation
 Grounded Enterprise AI Assistant
 ```
 ---
-#Key Features
+# Key Features
 
 ## RAG-Powered AI Assistant
 

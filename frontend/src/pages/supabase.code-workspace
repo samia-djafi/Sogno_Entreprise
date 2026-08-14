@@ -1,0 +1,15 @@
+{
+	"folders": [
+		{
+			"name": "supabase",
+			"path": "C:/Users/djafi.DESKTOP-6U93SOA/Downloads/sogno-enterprise (3)/supabase"
+		},
+		{
+			"name": "sogno-enterprise-ui",
+			"path": "../.."
+		}
+	],
+	"settings": {
+		"liveServer.settings.multiRootWorkspaceName": "sogno-enterprise-ui"
+	}
+}

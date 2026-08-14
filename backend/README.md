@@ -1,6 +1,7 @@
 # Sogno Enterprise — RAG Backend
 
-> A retrieval-augmented generation backend that lets employees query an internal knowledge base in natural language, without the answers wandering off into the model's pretrained guesses. [https://sogno-entreprise.onrender.com/docs](https://sogno-entreprise.onrender.com/docs)
+> A retrieval-augmented generation backend that lets employees query an internal knowledge base in natural language, without the answers wandering off into the model's pretrained guesses. [https://sogno-entreprise.onrender.com/docs](https://sogno-entreprise.onrender.com/docs)<br>
+> Note: The first request may take a little time to respond because the backend is hosted on Render and may need to wake up
 
 
 

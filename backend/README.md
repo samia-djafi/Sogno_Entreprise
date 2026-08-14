@@ -119,8 +119,7 @@ The system follows this pipeline:
 | Embeddings | `all-MiniLM-L6-v2` (Sentence Transformers) |
 | Vector store | Qdrant |
 | LLM | Llama 3.3 70B via Groq |
-| Frontend | React |
-| Deployment | Render (API) / Vercel (frontend) |
+| Deployment | Render (API) |
 
 ---
 

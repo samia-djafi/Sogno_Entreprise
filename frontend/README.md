@@ -2,7 +2,7 @@
  
 > The React SaaS interface for the Sogno Enterprise RAG assistant.
  
-This is the client application employees use to ask questions against the company knowledge base. It handles the conversation UI, response interactions, and application-level data (auth, conversation history, unanswered-question tracking) — the RAG pipeline itself lives in the separate [backend repository](https://github.com/username/repo-name).
+This is the client application employees use to ask questions against the company knowledge base. It handles the conversation UI, response interactions, and application-level data (auth, conversation history, unanswered-question tracking) — the RAG pipeline itself lives in the separate [backend demo][https://sogno-entreprise.onrender.com/docs](https://sogno-entreprise.onrender.com/docs).
  
 Live: [https://sogno-entreprise.vercel.app](https://sogno-entreprise.vercel.app)
 
